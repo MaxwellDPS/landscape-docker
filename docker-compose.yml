@@ -1,0 +1,31 @@
+version: "3.9"
+services:
+  postgres:
+    build: postgresql/.
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+     - "15672:15672"
+
+  landscape-server:
+    build: .
+    environment:
+      - STARTUP_WAIT_TIME=10
+      - INITIALIZE_SCHEMA=yes
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASS=${POSTGRES_PASSWORD}
+      - DB_LANDSCAPE_PASS=${DB_LANDSCAPE_PASS}
+      - DB_HOST=postgres
+      - RMQ_HOST=rabbitmq
+      - RMQ_PORT=5672
+      - SERVER_NAME=${SERVER_NAME}
+    depends_on:
+      - postgres
+      - rabbitmq
+    ports:
+      - "80:80"
+      - "443:443"
